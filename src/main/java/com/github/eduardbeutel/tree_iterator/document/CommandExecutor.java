@@ -1,8 +1,8 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 public class CommandExecutor<Node>
 {
@@ -12,76 +12,48 @@ public class CommandExecutor<Node>
         args[1] = Node Id as String
         args[2] = Node Path as String
    */
-    void execute(Command command, Object... args)
+    void execute(Command command, IterationStep<Node> step)
     {
-        if (args == null || args.length == 0) return;
-        if (evaluateConditions(command, args))
+        if (step == null) return;
+        if (evaluateConditions(command, step))
         {
-            executeOperation(command, args);
+            executeOperation(command, step);
         }
     }
 
-    protected boolean evaluateConditions(Command command, Object... args)
+    protected boolean evaluateConditions(Command command, IterationStep<Node> step)
     {
-        Node node = (Node) args[0];
-        String id = (String) args[1];
-        String path = (String) args[2];
-
         boolean result = true;
         for (Condition condition : command.getConditions())
         {
             switch (condition.getType())
             {
                 case NODE:
-                    result &= ((Predicate<Node>) condition.getObject()).test(node);
+                    result &= ((Predicate<Node>) condition.getObject()).test(step.getNode());
                     break;
                 case ID:
-                    result &= equals((String) condition.getObject(), id);
+                    result &= ((Predicate<String>) condition.getObject()).test(step.getId());
                     break;
                 case PATH:
-                    result &= equals((String) condition.getObject(), path);
+                    result &= ((Predicate<String>) condition.getObject()).test(step.getPath());
                     break;
-                case ID_PATTERN:
-                    result &= matches((Pattern) condition.getObject(), id);
-                    break;
-                case PATH_PATTERN:
-                    result &= matches((Pattern) condition.getObject(), path);
-                    break;
-                case ROOT:
-                    result &= isRoot(id, path);
+                case ID_PATH:
+                    result &= ((BiPredicate<String, String>) condition.getObject()).test(step.getId(), step.getPath());
                     break;
             }
         }
         return result;
     }
 
-    protected void executeOperation(Command command, Object... args)
+    protected void executeOperation(Command command, IterationStep<Node> step)
     {
-        Node node = (Node) args[0];
         switch (command.getOperation().getType())
         {
             case NODE_CONSUMER:
-                ((Consumer<Node>) command.getOperation().getObject()).accept(node);
+                ((Consumer<Node>) command.getOperation().getObject()).accept(step.getNode());
                 break;
         }
     }
 
-    protected boolean isRoot(String id, String path)
-    {
-        return ("/" + id).equals(path);
-    }
-
-    protected boolean matches(Pattern pattern, String path)
-    {
-        return pattern.matcher(path).matches();
-    }
-
-    protected boolean equals(String left, String right)
-    {
-        if (left == null && right != null) return false;
-        if (left != null && right == null) return false;
-        if (left == null && right == null) return true;
-        return left.equals(right);
-    }
 
 }

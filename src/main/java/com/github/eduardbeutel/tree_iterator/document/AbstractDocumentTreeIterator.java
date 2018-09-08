@@ -1,7 +1,10 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
+import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -10,6 +13,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 {
 
     public final Predicate<Node> ALWAYS_PREDICATE = node -> true;
+    public final BiPredicate<String,String> IS_ROOT_PREDICATE = (id,path) -> path.equals("/"+id);
 
     private Conditions<Node> conditions = new Conditions<>(this);
     private Operations<Node> operations = new Operations<>(this);
@@ -51,22 +55,22 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenId(String id)
         {
-            return iterator.addCondition(ConditionType.ID, id).getOperations();
+            return iterator.addCondition(ConditionType.ID, PredicateCreator.stringEquals(id)).getOperations();
         }
 
         public Operations<Node> whenPath(String path)
         {
-            return iterator.addCondition(ConditionType.PATH, path).getOperations();
+            return iterator.addCondition(ConditionType.PATH, PredicateCreator.stringEquals(path)).getOperations();
         }
 
         public Operations<Node> whenIdMatches(String pattern)
         {
-            return iterator.addCondition(ConditionType.ID_PATTERN, Pattern.compile(pattern)).getOperations();
+            return iterator.addCondition(ConditionType.ID, PredicateCreator.stringMatches(pattern)).getOperations();
         }
 
         public Operations<Node> whenPathMatches(String pattern)
         {
-            return iterator.addCondition(ConditionType.PATH_PATTERN, Pattern.compile(pattern)).getOperations();
+            return iterator.addCondition(ConditionType.PATH, PredicateCreator.stringMatches(pattern)).getOperations();
         }
 
         public Operations<Node> whenLeaf()
@@ -81,7 +85,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenRoot()
         {
-            return iterator.addCondition(ConditionType.ROOT, null).getOperations();
+            return iterator.addCondition(ConditionType.ID_PATH, iterator.IS_ROOT_PREDICATE).getOperations();
         }
 
     }
@@ -108,7 +112,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
     }
 
-    protected abstract void iterate(Object object);
+    protected abstract void iterate(Document document);
 
     protected abstract boolean isLeaf(Node node);
 
@@ -146,12 +150,23 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         if (lastCommand.getConditions().isEmpty()) commands.remove(lastIndex);
     }
 
-    protected void executeCommands(Node node, String id, String path)
+    protected void executeCommands(IterationStep<Node> step)
     {
         for (Command command : getCommands())
         {
-            getExecutor().execute(command, node, id, path);
+            getExecutor().execute(command, step);
         }
+    }
+
+    protected IterationStep<Node> createChildStep(IterationStep<Node> parentStep, Node child, String childId)
+    {
+        String childPath = parentStep.getPath() + "/" + childId;
+        return new IterationStep<>(
+                child,
+                childId,
+                childPath,
+                parentStep.getNode()
+        );
     }
 
     //

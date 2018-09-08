@@ -2,9 +2,11 @@ package com.github.eduardbeutel.tree_iterator.dom;
 
 import com.github.eduardbeutel.tree_iterator.core.TraversalDirection;
 import com.github.eduardbeutel.tree_iterator.document.AbstractDocumentTreeIterator;
+import com.github.eduardbeutel.tree_iterator.document.IterationStep;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, Element>
 {
@@ -28,11 +30,10 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
     }
 
     @Override
-    protected void iterate(Object object)
+    protected void iterate(Document document)
     {
-        Element rootElement = ((Document) object).getDocumentElement();
-        String rootId = getId(rootElement);
-        iterateElement(rootElement, rootId, "/" + rootId);
+        IterationStep<Element> step = createFirstStep(document);
+        iterateElement(step);
     }
 
     @Override
@@ -47,23 +48,22 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
         return true;
     }
 
-    protected void iterateElement(Element element, String id, String path)
+    protected void iterateElement(IterationStep<Element> step)
     {
-        if(TraversalDirection.TOP_DOWN == direction) executeCommands(element, id, path);
+        if(TraversalDirection.TOP_DOWN == direction) executeCommands(step);
 
-        int nrChildren = element.getChildNodes().getLength();
-        for (int i = 0; i < nrChildren; i++)
+        NodeList children = step.getNode().getChildNodes();
+        for (int i = 0; i < children.getLength(); i++)
         {
-            Node childNode = element.getChildNodes().item(i);
+            Node childNode = children.item(i);
             if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element childElement = (Element) childNode;
 
-            String childId = getId(childElement);
-            String childPath = path + "/" + childId;
-            iterateElement(childElement, childId, childPath);
+            IterationStep<Element> nextStep = createChildStep(step,childElement,getId(childElement));
+            iterateElement(nextStep);
         }
 
-        if(TraversalDirection.BOTTOM_UP == direction) executeCommands(element, id, path);
+        if(TraversalDirection.BOTTOM_UP == direction) executeCommands(step);
     }
 
     protected String getId(Element element)
@@ -71,6 +71,14 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
         String id = element.getLocalName();
         if (id == null) throw new RuntimeException("Please use DocumentBuilderFactory.setNamespaceAware(true).");
         return id;
+    }
+
+    protected IterationStep<Element> createFirstStep(Document document)
+    {
+        Element rootElement = document.getDocumentElement();
+        String rootId = getId(rootElement);
+        String rootPath = "/" + rootId;
+        return new IterationStep<>(rootElement, rootId, rootPath, null);
     }
 
 }
