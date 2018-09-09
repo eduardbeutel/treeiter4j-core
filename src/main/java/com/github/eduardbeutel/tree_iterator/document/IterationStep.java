@@ -19,16 +19,6 @@ public class IterationStep<Node>
         this.parent = parent;
     }
 
-    public void setDelete(boolean delete)
-    {
-        this.delete = delete;
-    }
-
-    public void setSkip(boolean skip)
-    {
-        this.skip = skip;
-    }
-
     public Node getNode()
     {
         return node;
@@ -42,21 +32,6 @@ public class IterationStep<Node>
     public String getPath()
     {
         return path;
-    }
-
-    public Node getParent()
-    {
-        return parent;
-    }
-
-    public boolean isDelete()
-    {
-        return delete;
-    }
-
-    public boolean isSkip()
-    {
-        return skip;
     }
 
 }
