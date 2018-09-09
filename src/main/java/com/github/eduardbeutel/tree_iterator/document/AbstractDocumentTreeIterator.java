@@ -2,6 +2,7 @@ package com.github.eduardbeutel.tree_iterator.document;
 
 import com.github.eduardbeutel.tree_iterator.core.OperationCreator;
 import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
+import com.github.eduardbeutel.tree_iterator.core.StopIterationException;
 
 import java.lang.ref.Reference;
 import java.util.ArrayList;
@@ -15,9 +16,6 @@ import java.util.function.Predicate;
 public abstract class AbstractDocumentTreeIterator<Document, Node>
 {
 
-    public final Predicate<Node> ALWAYS_PREDICATE = node -> true;
-    public final BiPredicate<String,String> IS_ROOT_PREDICATE = (id,path) -> path.equals("/"+id);
-
     private Conditions<Node> conditions = new Conditions<>(this);
     private Operations<Node> operations = new Operations<>(this);
     private Document document;
@@ -27,6 +25,8 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
     public static class Conditions<Node>
     {
+
+        public BiPredicate<String,String> IS_ROOT_PREDICATE = (id,path) -> path.equals("/"+id);
 
         private AbstractDocumentTreeIterator iterator;
 
@@ -38,7 +38,13 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         public void execute()
         {
             iterator.clearLastCommandIfEmpty();
-            iterator.iterate(iterator.getDocument());
+            try
+            {
+                iterator.iterate(iterator.getDocument());
+            }
+            catch (StopIterationException e)
+            {
+            }
         }
 
         public Operations<Node> when(Predicate<Node> predicate)
@@ -53,7 +59,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> always()
         {
-            return iterator.addCondition(ConditionType.NODE, iterator.ALWAYS_PREDICATE).getOperations();
+            return iterator.addCondition(ConditionType.NODE, PredicateCreator.always()).getOperations();
         }
 
         public Operations<Node> whenId(String id)
@@ -88,7 +94,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenRoot()
         {
-            return iterator.addCondition(ConditionType.ID_PATH, iterator.IS_ROOT_PREDICATE).getOperations();
+            return iterator.addCondition(ConditionType.ID_PATH, IS_ROOT_PREDICATE).getOperations();
         }
 
     }
@@ -121,6 +127,11 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         public Conditions<Node> collect(Collection<Node> collection)
         {
             return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.addToCollection(collection)).getConditions();
+        }
+
+        public Conditions<Node> stop()
+        {
+            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.throwException(new StopIterationException())).getConditions();
         }
 
     }

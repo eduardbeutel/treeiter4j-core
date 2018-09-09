@@ -19,4 +19,9 @@ public class OperationCreator
         return node -> collection.add(node);
     }
 
+    public static Consumer throwException(RuntimeException e)
+    {
+        return node -> {throw e;};
+    }
+
 }

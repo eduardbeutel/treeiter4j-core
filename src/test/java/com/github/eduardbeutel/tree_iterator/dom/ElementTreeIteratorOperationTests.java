@@ -104,4 +104,29 @@ public class ElementTreeIteratorOperationTests
         assertEquals("author", leafs.get(1).getLocalName());
     }
 
+    @Test
+    public void stop()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+        List<String> result = new ArrayList<>();
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .always().then(e -> result.add(e.getLocalName()))
+                .whenId("title").stop()
+                .execute()
+        ;
+
+        // then
+        assertEquals(Arrays.asList("library", "book", "title"), result);
+    }
+
 }
