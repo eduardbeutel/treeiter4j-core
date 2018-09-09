@@ -6,5 +6,4 @@ public enum ConditionType
     ID, // Predicate<String>
     PATH, // Predicate<String>
     ID_PATH, // BiPredicate<String,String>
-
 }

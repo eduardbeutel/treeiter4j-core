@@ -9,9 +9,7 @@ public class IterationStep<Node>
     private Node parent;
 
     private boolean delete = false;
-    private boolean ignore = false;
     private boolean skip = false;
-    private boolean stop = false;
 
     public IterationStep(Node node, String id, String path, Node parent)
     {
@@ -26,19 +24,9 @@ public class IterationStep<Node>
         this.delete = delete;
     }
 
-    public void setIgnore(boolean ignore)
-    {
-        this.ignore = ignore;
-    }
-
     public void setSkip(boolean skip)
     {
         this.skip = skip;
-    }
-
-    public void setStop(boolean stop)
-    {
-        this.stop = stop;
     }
 
     public Node getNode()
@@ -66,18 +54,9 @@ public class IterationStep<Node>
         return delete;
     }
 
-    public boolean isIgnore()
-    {
-        return ignore;
-    }
-
     public boolean isSkip()
     {
         return skip;
     }
 
-    public boolean isStop()
-    {
-        return stop;
-    }
 }

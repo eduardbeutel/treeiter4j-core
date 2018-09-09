@@ -1,13 +1,16 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
+import com.github.eduardbeutel.tree_iterator.core.OperationCreator;
 import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
 
+import java.lang.ref.Reference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 public abstract class AbstractDocumentTreeIterator<Document, Node>
 {
@@ -108,6 +111,16 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         public Conditions<Node> then(Consumer<Node> consumer)
         {
             return iterator.addOperation(OperationType.NODE_CONSUMER, consumer).getConditions();
+        }
+
+        public Conditions<Node> collect(AtomicReference<Node> reference)
+        {
+            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.setReference(reference)).getConditions();
+        }
+
+        public Conditions<Node> collect(Collection<Node> collection)
+        {
+            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.addToCollection(collection)).getConditions();
         }
 
     }
