@@ -183,4 +183,90 @@ public class ElementTreeIteratorOperationTests
         // then -> UnsupportedFeatureException
     }
 
+    @Test
+    public void remove_topDown()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book").remove()
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library></library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void remove_bottomUp()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <books>\n" +
+                        "        <book>\n" +
+                        "            <title />\n" +
+                        "            <author />\n" +
+                        "        </book>\n" +
+                        "    </books>\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.bottomUp(document)
+                .whenId("book").remove()
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library><books></books></library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void remove_root_hasNoEffect()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book />\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("library").remove()
+                .whenRoot().remove()
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book />\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
 }

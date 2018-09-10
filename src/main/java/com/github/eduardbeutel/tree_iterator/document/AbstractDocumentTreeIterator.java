@@ -140,6 +140,12 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
             return iterator.addOperation(OperationType.STEP_CONSUMER, setSkipTrue).getConditions();
         }
 
+        public Conditions<Node> remove()
+        {
+            Consumer<IterationStep<Node>> setRemoveTrue = step -> step.setRemove(true);
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setRemoveTrue).getConditions();
+        }
+
     }
 
     protected abstract void iterate(Document document);
@@ -186,7 +192,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         for (Command command : getCommands())
         {
             getExecutor().execute(command, step);
-            if(step.isSkip()) return;
+            if(step.isSkip() || step.isRemove()) return;
         }
     }
 

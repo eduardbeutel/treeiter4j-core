@@ -8,6 +8,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, Element>
 {
 
@@ -53,6 +56,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
             if(step.isSkip()) return;
         }
 
+        List<Element> toRemove = null;
         NodeList children = step.getNode().getChildNodes();
         for (int i = 0; i < children.getLength(); i++)
         {
@@ -62,9 +66,22 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
 
             IterationStep<Element> childStep = createChildStep(step,childElement,getId(childElement));
             iterateElement(childStep);
+
+            if(childStep.isRemove())
+            {
+                if(toRemove == null) toRemove = new ArrayList<>();
+                toRemove.add(childStep.getNode());
+            }
         }
+        remove(step.getNode(),toRemove);
 
         if(TraversalDirection.BOTTOM_UP == getDirection()) executeCommands(step);
+    }
+
+    protected void remove(Element parent, List<Element> children)
+    {
+        if(children == null) return;
+        children.forEach(child -> parent.removeChild(child));
     }
 
     protected String getId(Element element)

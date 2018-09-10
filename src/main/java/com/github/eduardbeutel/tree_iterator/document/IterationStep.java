@@ -8,7 +8,7 @@ public class IterationStep<Node>
     private String path;
     private Node parent;
 
-    private boolean delete = false;
+    private boolean remove = false;
     private boolean skip = false;
 
     public IterationStep(Node node, String id, String path, Node parent)
@@ -43,4 +43,17 @@ public class IterationStep<Node>
     {
         return skip;
     }
+
+    public boolean isRemove()
+    {
+        return remove;
+    }
+
+    public void setRemove(boolean remove)
+    {
+        this.remove = remove;
+    }
+
+
+
 }
