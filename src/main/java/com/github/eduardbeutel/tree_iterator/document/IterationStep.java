@@ -34,4 +34,13 @@ public class IterationStep<Node>
         return path;
     }
 
+    public void setSkip(boolean skip)
+    {
+        this.skip = skip;
+    }
+
+    public boolean isSkip()
+    {
+        return skip;
+    }
 }

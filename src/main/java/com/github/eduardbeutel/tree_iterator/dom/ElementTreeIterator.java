@@ -11,12 +11,9 @@ import org.w3c.dom.NodeList;
 public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, Element>
 {
 
-    private TraversalDirection direction;
-
     private ElementTreeIterator(Document document, TraversalDirection direction)
     {
-        super(document);
-        this.direction = direction;
+        super(document,direction);
     }
 
     public static Conditions<Element> topDown(Document document)
@@ -50,7 +47,11 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
 
     protected void iterateElement(IterationStep<Element> step)
     {
-        if(TraversalDirection.TOP_DOWN == direction) executeCommands(step);
+        if(TraversalDirection.TOP_DOWN == getDirection())
+        {
+            executeCommands(step);
+            if(step.isSkip()) return;
+        }
 
         NodeList children = step.getNode().getChildNodes();
         for (int i = 0; i < children.getLength(); i++)
@@ -59,11 +60,11 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
             if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element childElement = (Element) childNode;
 
-            IterationStep<Element> nextStep = createChildStep(step,childElement,getId(childElement));
-            iterateElement(nextStep);
+            IterationStep<Element> childStep = createChildStep(step,childElement,getId(childElement));
+            iterateElement(childStep);
         }
 
-        if(TraversalDirection.BOTTOM_UP == direction) executeCommands(step);
+        if(TraversalDirection.BOTTOM_UP == getDirection()) executeCommands(step);
     }
 
     protected String getId(Element element)

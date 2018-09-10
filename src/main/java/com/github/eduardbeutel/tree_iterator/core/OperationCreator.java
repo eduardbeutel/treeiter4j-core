@@ -9,17 +9,17 @@ import java.util.function.Consumer;
 public class OperationCreator
 {
 
-    public static Consumer setReference(AtomicReference reference)
+    public static <T> Consumer<T> setReference(AtomicReference<T> reference)
     {
         return node -> reference.set(node);
     }
 
-    public static Consumer addToCollection(Collection collection)
+    public static <T> Consumer<T> addToCollection(Collection<T> collection)
     {
         return node -> collection.add(node);
     }
 
-    public static Consumer throwException(RuntimeException e)
+    public static <T> Consumer<T> throwException(RuntimeException e)
     {
         return node -> {throw e;};
     }

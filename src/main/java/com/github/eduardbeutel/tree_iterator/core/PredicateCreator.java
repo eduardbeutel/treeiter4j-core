@@ -6,9 +6,9 @@ import java.util.regex.Pattern;
 public class PredicateCreator
 {
 
-    public static Predicate always()
+    public static <T> Predicate<T> always()
     {
-        return o -> true;
+        return param -> true;
     }
 
     public static Predicate<String> stringEquals(String other)

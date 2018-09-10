@@ -52,6 +52,9 @@ public class CommandExecutor<Node>
             case NODE_CONSUMER:
                 ((Consumer<Node>) command.getOperation().getObject()).accept(step.getNode());
                 break;
+            case STEP_CONSUMER:
+                ((Consumer<IterationStep<Node>>) command.getOperation().getObject()).accept(step);
+                break;
         }
     }
 

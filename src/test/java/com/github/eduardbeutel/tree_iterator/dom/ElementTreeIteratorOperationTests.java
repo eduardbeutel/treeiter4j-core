@@ -1,5 +1,6 @@
 package com.github.eduardbeutel.tree_iterator.dom;
 
+import com.github.eduardbeutel.tree_iterator.core.UnsupportedFeatureException;
 import com.github.eduardbeutel.tree_iterator.dom.ElementTreeIterator;
 import com.github.eduardbeutel.tree_iterator.test.XmlUtils;
 import org.custommonkey.xmlunit.XMLAssert;
@@ -127,6 +128,59 @@ public class ElementTreeIteratorOperationTests
 
         // then
         assertEquals(Arrays.asList("library", "book", "title"), result);
+    }
+
+    @Test
+    public void skip()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book1>\n" +
+                        "        <title1 />\n" +
+                        "    </book1>\n" +
+                        "    <book2>\n" +
+                        "        <title2 />\n" +
+                        "    </book2>\n" +
+                        "    <book3>\n" +
+                        "        <title3 />\n" +
+                        "    </book3>\n" +
+                        "</library>"
+        );
+        List<String> result = new ArrayList<>();
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book2").skip()
+                .always().then(e -> result.add(e.getLocalName()))
+                .execute()
+        ;
+
+        // then
+        assertEquals(Arrays.asList("library", "book1", "title1", "book3", "title3"), result);
+    }
+
+    @Test(expected = UnsupportedFeatureException.class)
+    public void skip_usedInBottomUpMode_throwsException()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book1>\n" +
+                        "        <title1 />\n" +
+                        "    </book1>\n" +
+                        "</library>"
+        );
+        List<String> result = new ArrayList<>();
+
+        // when
+        ElementTreeIterator.bottomUp(document)
+                .whenId("book2").skip()
+                .always().then(e -> result.add(e.getLocalName()))
+                .execute()
+        ;
+
+        // then -> UnsupportedFeatureException
     }
 
 }

@@ -1,8 +1,6 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
-import com.github.eduardbeutel.tree_iterator.core.OperationCreator;
-import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
-import com.github.eduardbeutel.tree_iterator.core.StopIterationException;
+import com.github.eduardbeutel.tree_iterator.core.*;
 
 import java.lang.ref.Reference;
 import java.util.ArrayList;
@@ -19,6 +17,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     private Conditions<Node> conditions = new Conditions<>(this);
     private Operations<Node> operations = new Operations<>(this);
     private Document document;
+    private TraversalDirection direction;
     private List<Command> commands = new ArrayList<>();
     private Command currentCommand;
     private CommandExecutor<Node> executor = new CommandExecutor<>();
@@ -54,12 +53,12 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenNot(Predicate<Node> predicate)
         {
-            return iterator.addCondition(ConditionType.NODE, predicate.negate()).getOperations();
+            return when(predicate.negate());
         }
 
         public Operations<Node> always()
         {
-            return iterator.addCondition(ConditionType.NODE, PredicateCreator.always()).getOperations();
+            return when(PredicateCreator.always());
         }
 
         public Operations<Node> whenId(String id)
@@ -121,17 +120,24 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Conditions<Node> collect(AtomicReference<Node> reference)
         {
-            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.setReference(reference)).getConditions();
+            return then(OperationCreator.setReference(reference));
         }
 
         public Conditions<Node> collect(Collection<Node> collection)
         {
-            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.addToCollection(collection)).getConditions();
+            return then(OperationCreator.addToCollection(collection));
         }
 
         public Conditions<Node> stop()
         {
-            return iterator.addOperation(OperationType.NODE_CONSUMER, OperationCreator.throwException(new StopIterationException())).getConditions();
+            return then(OperationCreator.throwException(new StopIterationException()));
+        }
+
+        public Conditions<Node> skip()
+        {
+            if(TraversalDirection.BOTTOM_UP == iterator.getDirection()) throw new UnsupportedFeatureException("skip() can not be used in bottomUp() mode.");
+            Consumer<IterationStep<Node>> setSkipTrue = step -> step.setSkip(true);
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setSkipTrue).getConditions();
         }
 
     }
@@ -140,9 +146,10 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
     protected abstract boolean isLeaf(Node node);
 
-    protected AbstractDocumentTreeIterator(Document document)
+    protected AbstractDocumentTreeIterator(Document document, TraversalDirection direction)
     {
         this.document = document;
+        this.direction = direction;
     }
 
     protected AbstractDocumentTreeIterator<Document, Node> addCondition(ConditionType type, Object condition)
@@ -179,6 +186,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         for (Command command : getCommands())
         {
             getExecutor().execute(command, step);
+            if(step.isSkip()) return;
         }
     }
 
@@ -220,5 +228,8 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         return executor;
     }
 
-
+    protected TraversalDirection getDirection()
+    {
+        return direction;
+    }
 }
