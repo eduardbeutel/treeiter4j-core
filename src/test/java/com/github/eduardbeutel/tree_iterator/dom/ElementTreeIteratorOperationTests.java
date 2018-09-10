@@ -269,4 +269,67 @@ public class ElementTreeIteratorOperationTests
         );
     }
 
+    @Test
+    public void replace()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                "</library>"
+        );
+
+        Element replacement = document.createElement("emptyBook");
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book").replace( () -> replacement )
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <emptyBook />\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void replace_root_isAllowed()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+
+        Element replacement = document.createElement("emptyBook");
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("library").replace( () -> replacement )
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<emptyBook />\n"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+
 }

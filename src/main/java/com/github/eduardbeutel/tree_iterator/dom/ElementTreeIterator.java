@@ -34,6 +34,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
     {
         IterationStep<Element> step = createFirstStep(document);
         iterateElement(step);
+        if(step.isReplace()) document.replaceChild(step.getReplacement(), step.getNode());
     }
 
     @Override
@@ -57,6 +58,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
         }
 
         List<Element> toRemove = null;
+        List<IterationStep<Element>> toReplace = null;
         NodeList children = step.getNode().getChildNodes();
         for (int i = 0; i < children.getLength(); i++)
         {
@@ -72,10 +74,22 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
                 if(toRemove == null) toRemove = new ArrayList<>();
                 toRemove.add(childStep.getNode());
             }
+            else if(childStep.isReplace())
+            {
+                if(toReplace == null) toReplace = new ArrayList<>();
+                toReplace.add(childStep);
+            }
         }
         remove(step.getNode(),toRemove);
+        replace(step.getNode(),toReplace);
 
         if(TraversalDirection.BOTTOM_UP == getDirection()) executeCommands(step);
+    }
+
+    protected void replace(Element parent, List<IterationStep<Element>> children)
+    {
+        if(children == null) return;
+        children.forEach(child -> parent.replaceChild(child.getReplacement(), child.getNode()));
     }
 
     protected void remove(Element parent, List<Element> children)
@@ -96,7 +110,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
         Element rootElement = document.getDocumentElement();
         String rootId = getId(rootElement);
         String rootPath = "/" + rootId;
-        return new IterationStep<>(rootElement, rootId, rootPath, null);
+        return new IterationStep<>(rootElement, rootId, rootPath);
     }
 
 }

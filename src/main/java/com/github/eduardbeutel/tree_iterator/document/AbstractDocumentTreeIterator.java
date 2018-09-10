@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public abstract class AbstractDocumentTreeIterator<Document, Node>
 {
@@ -146,6 +147,12 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
             return iterator.addOperation(OperationType.STEP_CONSUMER, setRemoveTrue).getConditions();
         }
 
+        public Conditions<Node> replace(Supplier<Node> supplier)
+        {
+            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(supplier.get());
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+        }
+
     }
 
     protected abstract void iterate(Document document);
@@ -192,7 +199,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         for (Command command : getCommands())
         {
             getExecutor().execute(command, step);
-            if(step.isSkip() || step.isRemove()) return;
+            if(step.isSkip() || step.isRemove() || step.isReplace()) return;
         }
     }
 
@@ -202,8 +209,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         return new IterationStep<>(
                 child,
                 childId,
-                childPath,
-                parentStep.getNode()
+                childPath
         );
     }
 
@@ -238,4 +244,5 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     {
         return direction;
     }
+
 }
