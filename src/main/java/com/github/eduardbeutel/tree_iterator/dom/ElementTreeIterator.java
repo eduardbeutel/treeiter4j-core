@@ -60,6 +60,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
         List<Element> toRemove = null;
         List<IterationStep<Element>> toReplace = null;
         NodeList children = step.getNode().getChildNodes();
+
         for (int i = 0; i < children.getLength(); i++)
         {
             Node childNode = children.item(i);
@@ -80,6 +81,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
                 toReplace.add(childStep);
             }
         }
+
         remove(step.getNode(),toRemove);
         replace(step.getNode(),toReplace);
 

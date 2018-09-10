@@ -26,7 +26,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     public static class Conditions<Node>
     {
 
-        public BiPredicate<String,String> IS_ROOT_PREDICATE = (id,path) -> path.equals("/"+id);
+        public Predicate<String> IS_ROOT_PREDICATE = path -> path.lastIndexOf('/') == 0;
 
         private AbstractDocumentTreeIterator iterator;
 
@@ -94,7 +94,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenRoot()
         {
-            return iterator.addCondition(ConditionType.ID_PATH, IS_ROOT_PREDICATE).getOperations();
+            return iterator.addCondition(ConditionType.PATH, IS_ROOT_PREDICATE).getOperations();
         }
 
     }
@@ -206,11 +206,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     protected IterationStep<Node> createChildStep(IterationStep<Node> parentStep, Node child, String childId)
     {
         String childPath = parentStep.getPath() + "/" + childId;
-        return new IterationStep<>(
-                child,
-                childId,
-                childPath
-        );
+        return new IterationStep<>(child, childId, childPath);
     }
 
     //

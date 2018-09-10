@@ -37,9 +37,6 @@ public class CommandExecutor<Node>
                 case PATH:
                     result &= ((Predicate<String>) condition.getObject()).test(step.getPath());
                     break;
-                case ID_PATH:
-                    result &= ((BiPredicate<String, String>) condition.getObject()).test(step.getId(), step.getPath());
-                    break;
             }
         }
         return result;
