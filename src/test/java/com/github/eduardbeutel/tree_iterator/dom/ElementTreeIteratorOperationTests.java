@@ -242,7 +242,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
-    public void remove_root_hasNoEffect()
+    public void remove_root_indirectly_hasNoEffect()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -254,6 +254,32 @@ public class ElementTreeIteratorOperationTests
         // when
         ElementTreeIterator.topDown(document)
                 .whenId("library").remove()
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book />\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test(expected = UnsupportedFeatureException.class)
+    public void remove_root_directly_throwsException()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book />\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.topDown(document)
                 .whenRoot().remove()
                 .execute()
         ;

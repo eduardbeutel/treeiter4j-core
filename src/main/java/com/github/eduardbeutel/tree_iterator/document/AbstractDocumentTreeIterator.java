@@ -21,6 +21,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     private TraversalDirection direction;
     private List<Command> commands = new ArrayList<>();
     private Command currentCommand;
+    private boolean currentCommandContainsWhenRoot = false;
     private CommandExecutor<Node> executor = new CommandExecutor<>();
 
     public static class Conditions<Node>
@@ -94,7 +95,9 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenRoot()
         {
-            return iterator.addCondition(ConditionType.PATH, IS_ROOT_PREDICATE).getOperations();
+            iterator.addCondition(ConditionType.PATH, IS_ROOT_PREDICATE);
+            iterator.currentCommandContainsWhenRoot = true;
+            return iterator.getOperations();
         }
 
     }
@@ -143,6 +146,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Conditions<Node> remove()
         {
+            if(iterator.currentCommandContainsWhenRoot) throw new UnsupportedFeatureException("The root element can not be removed.");
             Consumer<IterationStep<Node>> setRemoveTrue = step -> step.setRemove(true);
             return iterator.addOperation(OperationType.STEP_CONSUMER, setRemoveTrue).getConditions();
         }
@@ -182,8 +186,9 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     protected void newCommand()
     {
         Command command = new Command();
-        currentCommand = command;
         commands.add(command);
+        currentCommand = command;
+        currentCommandContainsWhenRoot = false;
     }
 
     protected void clearLastCommandIfEmpty()
