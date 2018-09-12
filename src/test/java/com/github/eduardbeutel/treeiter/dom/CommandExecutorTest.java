@@ -14,7 +14,7 @@ public class CommandExecutorTest
     {
         // given
         CommandExecutor<String> executor = new CommandExecutor<>();
-        Condition<String> unsupportedCondition = new Condition<>( o -> true );
+        Condition<String> unsupportedCondition = new Condition<>(o -> true);
         Command command = new Command();
         command.getConditions().add(unsupportedCondition);
 

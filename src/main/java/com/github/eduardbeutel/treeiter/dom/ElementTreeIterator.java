@@ -16,7 +16,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
 
     private ElementTreeIterator(Document document, TraversalDirection direction)
     {
-        super(document,direction);
+        super(document, direction);
     }
 
     public static Conditions<Element> topDown(Document document)
@@ -34,7 +34,7 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
     {
         IterationStep<Element> step = createFirstStep(document);
         iterateElement(step);
-        if(step.isReplace()) document.replaceChild(step.getReplacement(), step.getNode());
+        if (step.isReplace()) document.replaceChild(step.getReplacement(), step.getNode());
     }
 
     @Override
@@ -51,10 +51,10 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
 
     protected void iterateElement(IterationStep<Element> step)
     {
-        if(TraversalDirection.TOP_DOWN == getDirection())
+        if (TraversalDirection.TOP_DOWN == getDirection())
         {
             executeCommands(step);
-            if(step.isSkip()) return;
+            if (step.isSkip()) return;
         }
 
         List<Element> toRemove = null;
@@ -67,36 +67,36 @@ public class ElementTreeIterator extends AbstractDocumentTreeIterator<Document, 
             if (childNode.getNodeType() != Node.ELEMENT_NODE) continue;
             Element childElement = (Element) childNode;
 
-            IterationStep<Element> childStep = createChildStep(step,childElement,getId(childElement));
+            IterationStep<Element> childStep = createChildStep(step, childElement, getId(childElement));
             iterateElement(childStep);
 
-            if(childStep.isRemove())
+            if (childStep.isRemove())
             {
-                if(toRemove == null) toRemove = new ArrayList<>();
+                if (toRemove == null) toRemove = new ArrayList<>();
                 toRemove.add(childStep.getNode());
             }
-            else if(childStep.isReplace())
+            else if (childStep.isReplace())
             {
-                if(toReplace == null) toReplace = new ArrayList<>();
+                if (toReplace == null) toReplace = new ArrayList<>();
                 toReplace.add(childStep);
             }
         }
 
-        remove(step.getNode(),toRemove);
-        replace(step.getNode(),toReplace);
+        remove(step.getNode(), toRemove);
+        replace(step.getNode(), toReplace);
 
-        if(TraversalDirection.BOTTOM_UP == getDirection()) executeCommands(step);
+        if (TraversalDirection.BOTTOM_UP == getDirection()) executeCommands(step);
     }
 
     protected void replace(Element parent, List<IterationStep<Element>> children)
     {
-        if(children == null) return;
+        if (children == null) return;
         children.forEach(child -> parent.replaceChild(child.getReplacement(), child.getNode()));
     }
 
     protected void remove(Element parent, List<Element> children)
     {
-        if(children == null) return;
+        if (children == null) return;
         children.forEach(child -> parent.removeChild(child));
     }
 

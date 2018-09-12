@@ -31,7 +31,7 @@ public class CommandExecutor<Node>
         if (condition instanceof NodeCondition) return evaluateNodeCondition(condition, step.getNode());
         else if (condition instanceof IdCondition) return evaluateStringCondition(condition, step.getId());
         else if (condition instanceof PathCondition) return evaluateStringCondition(condition, step.getPath());
-        else throw new UnsupportedFeatureException("Conditions of type "+condition.getClass().getName()+ " are not supported");
+        else throw new UnsupportedFeatureException("Conditions of type " + condition.getClass().getName() + " are not supported");
     }
 
     private boolean evaluateStringCondition(Condition condition, String id)

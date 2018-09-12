@@ -90,7 +90,7 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .when(e -> "2".equals(e.getAttribute("id"))).then((node,id) -> node.setTextContent(id))
+                .when(e -> "2".equals(e.getAttribute("id"))).then((node, id) -> node.setTextContent(id))
                 .execute()
         ;
 
@@ -119,7 +119,7 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .when(e -> "2".equals(e.getAttribute("id"))).then((node,id,path) -> node.setTextContent(id+path))
+                .when(e -> "2".equals(e.getAttribute("id"))).then((node, id, path) -> node.setTextContent(id + path))
                 .execute()
         ;
 
@@ -196,7 +196,7 @@ public class ElementTreeIteratorOperationTests
                         "    </book>\n" +
                         "</library>"
         );
-        Map<String,Element> elements = new LinkedHashMap<>();
+        Map<String, Element> elements = new LinkedHashMap<>();
 
         // when
         ElementTreeIterator.topDown(document)
@@ -206,8 +206,8 @@ public class ElementTreeIteratorOperationTests
 
         // then
         assertEquals(4, elements.size());
-        Arrays.asList("library","book","title","author")
-                .forEach( item -> assertEquals(item, elements.get(item).getLocalName()));
+        Arrays.asList("library", "book", "title", "author")
+                .forEach(item -> assertEquals(item, elements.get(item).getLocalName()));
     }
 
     @Test
@@ -222,7 +222,7 @@ public class ElementTreeIteratorOperationTests
                         "    </book>\n" +
                         "</library>"
         );
-        Map<String,Element> elements = new LinkedHashMap<>();
+        Map<String, Element> elements = new LinkedHashMap<>();
 
         // when
         ElementTreeIterator.topDown(document)
@@ -232,10 +232,10 @@ public class ElementTreeIteratorOperationTests
 
         // then
         assertEquals(4, elements.size());
-        assertEquals("library",elements.get("/library").getLocalName());
-        assertEquals("book",elements.get("/library/book").getLocalName());
-        assertEquals("title",elements.get("/library/book/title").getLocalName());
-        assertEquals("author",elements.get("/library/book/author").getLocalName());
+        assertEquals("library", elements.get("/library").getLocalName());
+        assertEquals("book", elements.get("/library/book").getLocalName());
+        assertEquals("title", elements.get("/library/book/title").getLocalName());
+        assertEquals("author", elements.get("/library/book/author").getLocalName());
     }
 
     @Test
@@ -438,14 +438,14 @@ public class ElementTreeIteratorOperationTests
                         "        <title />\n" +
                         "        <author />\n" +
                         "    </book>\n" +
-                "</library>"
+                        "</library>"
         );
 
         Element replacement = document.createElement("anotherBook");
 
         // when
         ElementTreeIterator.topDown(document)
-                .whenId("book").replace( () -> replacement )
+                .whenId("book").replace(() -> replacement)
                 .execute()
         ;
 
@@ -477,7 +477,7 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .whenId("library").replace( () -> replacement )
+                .whenId("library").replace(() -> replacement)
                 .execute()
         ;
 
@@ -507,7 +507,11 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .whenId("book").replace( (node) -> { replacement.setTextContent(node.getLocalName()); return replacement; } )
+                .whenId("book").replace((node) ->
+        {
+            replacement.setTextContent(node.getLocalName());
+            return replacement;
+        })
                 .execute()
         ;
 
@@ -539,7 +543,11 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .whenId("book").replace( (node,id) -> { replacement.setTextContent(id+"/"+node.getLocalName()); return replacement; } )
+                .whenId("book").replace((node, id) ->
+        {
+            replacement.setTextContent(id + "/" + node.getLocalName());
+            return replacement;
+        })
                 .execute()
         ;
 
@@ -571,7 +579,11 @@ public class ElementTreeIteratorOperationTests
 
         // when
         ElementTreeIterator.topDown(document)
-                .whenId("book").replace( (node,id, path) -> { replacement.setTextContent(id+"/"+node.getLocalName()+path); return replacement; } )
+                .whenId("book").replace((node, id, path) ->
+        {
+            replacement.setTextContent(id + "/" + node.getLocalName() + path);
+            return replacement;
+        })
                 .execute()
         ;
 

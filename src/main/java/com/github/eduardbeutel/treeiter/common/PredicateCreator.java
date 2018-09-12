@@ -8,7 +8,7 @@ public class PredicateCreator
 
     public static Predicate<String> stringEquals(String other)
     {
-        return param -> PredicateCreator.equals(param,other);
+        return param -> PredicateCreator.equals(param, other);
     }
 
     public static Predicate<String> stringMatches(String pattern)

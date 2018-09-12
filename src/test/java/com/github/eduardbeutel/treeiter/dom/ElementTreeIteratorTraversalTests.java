@@ -34,7 +34,7 @@ public class ElementTreeIteratorTraversalTests
         ;
 
         // then
-        assertEquals(Arrays.asList("library","book","title","author"), result);
+        assertEquals(Arrays.asList("library", "book", "title", "author"), result);
     }
 
     @Test
@@ -75,8 +75,8 @@ public class ElementTreeIteratorTraversalTests
 
         // then
         assertEquals(Arrays.asList(
-                "title1","author1","book1","title2","author2","book2","books",
-                "name1","date1","newspaper1","name2","date2","newspaper2","newspapers",
+                "title1", "author1", "book1", "title2", "author2", "book2", "books",
+                "name1", "date1", "newspaper1", "name2", "date2", "newspaper2", "newspapers",
                 "library"
         ), result);
     }
