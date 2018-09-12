@@ -7,10 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public abstract class AbstractDocumentTreeIterator<Document, Node>
 {
@@ -120,6 +117,16 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         public Conditions<Node> then(Consumer<Node> consumer)
         {
             return iterator.addOperation(OperationType.NODE_CONSUMER, consumer).getConditions();
+        }
+
+        public Conditions<Node> then(BiConsumer<Node,String> consumer)
+        {
+            return iterator.addOperation(OperationType.NODE_ID_CONSUMER, consumer).getConditions();
+        }
+
+        public Conditions<Node> then(TriConsumer<Node,String,String> consumer)
+        {
+            return iterator.addOperation(OperationType.NODE_ID_PATH_CONSUMER, consumer).getConditions();
         }
 
         public Conditions<Node> collect(AtomicReference<Node> reference)

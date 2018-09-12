@@ -56,6 +56,64 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
+    public void then_nodeAndIdConsumer()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book id=\"1\" />\n" +
+                        "    <book/>\n" +
+                        "    <book id=\"2\" />\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .when(e -> "2".equals(e.getAttribute("id"))).then((node,id) -> node.setTextContent(id))
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book id=\"1\" />\n" +
+                        "    <book/>\n" +
+                        "    <book id=\"2\">book</book>\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual(expectedDocument, document);
+    }
+
+    @Test
+    public void then_nodeAndIdAndPathConsumer()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book id=\"1\" />\n" +
+                        "    <book/>\n" +
+                        "    <book id=\"2\" />\n" +
+                        "</library>"
+        );
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .when(e -> "2".equals(e.getAttribute("id"))).then((node,id,path) -> node.setTextContent(id+path))
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book id=\"1\" />\n" +
+                        "    <book/>\n" +
+                        "    <book id=\"2\">book/library/book</book>\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual(expectedDocument, document);
+    }
+
+    @Test
     public void collect_toReference()
     {
         // given

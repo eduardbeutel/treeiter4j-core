@@ -1,5 +1,8 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
+import com.github.eduardbeutel.tree_iterator.core.TriConsumer;
+
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -48,6 +51,12 @@ public class CommandExecutor<Node>
         {
             case NODE_CONSUMER:
                 ((Consumer<Node>) command.getOperation().getObject()).accept(step.getNode());
+                break;
+            case NODE_ID_CONSUMER:
+                ((BiConsumer<Node,String>) command.getOperation().getObject()).accept(step.getNode(),step.getId());
+                break;
+            case NODE_ID_PATH_CONSUMER:
+                ((TriConsumer<Node,String,String>) command.getOperation().getObject()).accept(step.getNode(),step.getId(),step.getPath());
                 break;
             case STEP_CONSUMER:
                 ((Consumer<IterationStep<Node>>) command.getOperation().getObject()).accept(step);
