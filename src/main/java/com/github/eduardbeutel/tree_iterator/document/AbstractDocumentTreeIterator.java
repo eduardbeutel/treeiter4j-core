@@ -24,7 +24,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     public static class Conditions<Node>
     {
 
-        public Predicate<String> IS_ROOT_PREDICATE = path -> path.lastIndexOf('/') == 0;
+        public PathCondition IS_ROOT_CONDITION = new PathCondition(path -> path.lastIndexOf('/') == 0);
 
         private AbstractDocumentTreeIterator iterator;
 
@@ -47,7 +47,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> when(Predicate<Node> predicate)
         {
-            return iterator.addCondition(ConditionType.NODE, predicate).getOperations();
+            return iterator.addCondition(new NodeCondition<>(predicate)).getOperations();
         }
 
         public Operations<Node> whenNot(Predicate<Node> predicate)
@@ -62,22 +62,22 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenId(String id)
         {
-            return iterator.addCondition(ConditionType.ID, PredicateCreator.stringEquals(id)).getOperations();
+            return iterator.addCondition(new IdCondition(PredicateCreator.stringEquals(id))).getOperations();
         }
 
         public Operations<Node> whenPath(String path)
         {
-            return iterator.addCondition(ConditionType.PATH, PredicateCreator.stringEquals(path)).getOperations();
+            return iterator.addCondition(new PathCondition(PredicateCreator.stringEquals(path))).getOperations();
         }
 
         public Operations<Node> whenIdMatches(String pattern)
         {
-            return iterator.addCondition(ConditionType.ID, PredicateCreator.stringMatches(pattern)).getOperations();
+            return iterator.addCondition(new IdCondition(PredicateCreator.stringMatches(pattern))).getOperations();
         }
 
         public Operations<Node> whenPathMatches(String pattern)
         {
-            return iterator.addCondition(ConditionType.PATH, PredicateCreator.stringMatches(pattern)).getOperations();
+            return iterator.addCondition(new PathCondition(PredicateCreator.stringMatches(pattern))).getOperations();
         }
 
         public Operations<Node> whenLeaf()
@@ -92,9 +92,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> whenRoot()
         {
-            iterator.addCondition(ConditionType.PATH, IS_ROOT_PREDICATE);
-            iterator.currentCommandContainsWhenRoot = true;
-            return iterator.getOperations();
+            return iterator.addRootCondition(IS_ROOT_CONDITION).getOperations();
         }
 
     }
@@ -222,10 +220,17 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         this.direction = direction;
     }
 
-    protected AbstractDocumentTreeIterator<Document, Node> addCondition(ConditionType type, Object condition)
+    protected AbstractDocumentTreeIterator<Document, Node> addCondition(Condition condition)
     {
         if (currentCommand == null) newCommand();
-        currentCommand.addCondition(new Condition(type, condition));
+        currentCommand.addCondition(condition);
+        return this;
+    }
+
+    protected AbstractDocumentTreeIterator<Document, Node> addRootCondition(Condition condition)
+    {
+        addCondition(condition);
+        currentCommandContainsWhenRoot = true;
         return this;
     }
 

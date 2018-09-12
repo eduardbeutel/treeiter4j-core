@@ -1,23 +1,15 @@
 package com.github.eduardbeutel.tree_iterator.document;
 
-import com.github.eduardbeutel.tree_iterator.core.TriConsumer;
+import com.github.eduardbeutel.tree_iterator.core.*;
 
-import java.util.function.BiConsumer;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class CommandExecutor<Node>
 {
 
-    /*
-        args[0] = Node
-        args[1] = Node Id as String
-        args[2] = Node Path as String
-   */
-    void execute(Command command, IterationStep<Node> step)
+    public void execute(Command command, IterationStep<Node> step)
     {
-        if (step == null) return;
         if (evaluateConditions(command, step))
         {
             executeOperation(command, step);
@@ -29,20 +21,27 @@ public class CommandExecutor<Node>
         boolean result = true;
         for (Condition condition : command.getConditions())
         {
-            switch (condition.getType())
-            {
-                case NODE:
-                    result &= ((Predicate<Node>) condition.getObject()).test(step.getNode());
-                    break;
-                case ID:
-                    result &= ((Predicate<String>) condition.getObject()).test(step.getId());
-                    break;
-                case PATH:
-                    result &= ((Predicate<String>) condition.getObject()).test(step.getPath());
-                    break;
-            }
+            result &= evaluateCondition(condition, step);
         }
         return result;
+    }
+
+    protected boolean evaluateCondition(Condition condition, IterationStep<Node> step)
+    {
+        if (condition instanceof NodeCondition) return evaluateNodeCondition(condition, step.getNode());
+        else if (condition instanceof IdCondition) return evaluateStringCondition(condition, step.getId());
+        else if (condition instanceof PathCondition) return evaluateStringCondition(condition, step.getPath());
+        else throw new UnsupportedFeatureException("Conditions of type "+condition.getClass().getName()+ " are not supported");
+    }
+
+    private boolean evaluateStringCondition(Condition condition, String id)
+    {
+        return ((Predicate<String>) condition.getPredicate()).test(id);
+    }
+
+    private boolean evaluateNodeCondition(Condition condition, Node node)
+    {
+        return ((Predicate<Node>) condition.getPredicate()).test(node);
     }
 
     protected void executeOperation(Command command, IterationStep<Node> step)
