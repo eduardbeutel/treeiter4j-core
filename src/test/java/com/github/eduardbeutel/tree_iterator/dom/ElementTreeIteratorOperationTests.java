@@ -56,7 +56,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
-    public void then_nodeAndIdConsumer()
+    public void then_nodeAndIdArguments()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -85,7 +85,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
-    public void then_nodeAndIdAndPathConsumer()
+    public void then_nodeAndIdAndPathArguments()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -300,7 +300,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
-    public void remove_root_indirectly_hasNoEffect()
+    public void removeRoot_indirectly_hasNoEffect()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -327,7 +327,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test(expected = UnsupportedFeatureException.class)
-    public void remove_root_directly_throwsException()
+    public void removeRoot_directly_throwsException()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -366,7 +366,7 @@ public class ElementTreeIteratorOperationTests
                 "</library>"
         );
 
-        Element replacement = document.createElement("emptyBook");
+        Element replacement = document.createElement("anotherBook");
 
         // when
         ElementTreeIterator.topDown(document)
@@ -377,7 +377,7 @@ public class ElementTreeIteratorOperationTests
         // then
         Document expectedDocument = XmlUtils.createDocument(
                 "<library>\n" +
-                        "    <emptyBook />\n" +
+                        "    <anotherBook />\n" +
                         "</library>"
         );
         XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
@@ -386,7 +386,7 @@ public class ElementTreeIteratorOperationTests
     }
 
     @Test
-    public void replace_root_isAllowed()
+    public void replaceRoot_isAllowed()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -398,7 +398,7 @@ public class ElementTreeIteratorOperationTests
                         "</library>"
         );
 
-        Element replacement = document.createElement("emptyBook");
+        Element replacement = document.createElement("anotherBook");
 
         // when
         ElementTreeIterator.topDown(document)
@@ -408,7 +408,103 @@ public class ElementTreeIteratorOperationTests
 
         // then
         Document expectedDocument = XmlUtils.createDocument(
-                "<emptyBook />\n"
+                "<anotherBook />\n"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void replace_nodeArgument()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+
+        Element replacement = document.createElement("anotherBook");
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book").replace( (node) -> { replacement.setTextContent(node.getLocalName()); return replacement; } )
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <anotherBook>book</anotherBook>\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void replace_nodeAndIdArgument()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+
+        Element replacement = document.createElement("anotherBook");
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book").replace( (node,id) -> { replacement.setTextContent(id+"/"+node.getLocalName()); return replacement; } )
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <anotherBook>book/book</anotherBook>\n" +
+                        "</library>"
+        );
+        XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
+                expectedDocument, document
+        );
+    }
+
+    @Test
+    public void replace_nodeAndIdAndPathArgument()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+
+        Element replacement = document.createElement("anotherBook");
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .whenId("book").replace( (node,id, path) -> { replacement.setTextContent(id+"/"+node.getLocalName()+path); return replacement; } )
+                .execute()
+        ;
+
+        // then
+        Document expectedDocument = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <anotherBook>book/book/library/book</anotherBook>\n" +
+                        "</library>"
         );
         XMLAssert.assertXMLEqual("Actual: " + System.lineSeparator() + XmlUtils.prettyPrint(document),
                 expectedDocument, document

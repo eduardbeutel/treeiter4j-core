@@ -2,7 +2,6 @@ package com.github.eduardbeutel.tree_iterator.document;
 
 import com.github.eduardbeutel.tree_iterator.core.*;
 
-import java.lang.ref.Reference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -119,12 +118,12 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
             return iterator.addOperation(OperationType.NODE_CONSUMER, consumer).getConditions();
         }
 
-        public Conditions<Node> then(BiConsumer<Node,String> consumer)
+        public Conditions<Node> then(BiConsumer<Node, String> consumer)
         {
             return iterator.addOperation(OperationType.NODE_ID_CONSUMER, consumer).getConditions();
         }
 
-        public Conditions<Node> then(TriConsumer<Node,String,String> consumer)
+        public Conditions<Node> then(TriConsumer<Node, String, String> consumer)
         {
             return iterator.addOperation(OperationType.NODE_ID_PATH_CONSUMER, consumer).getConditions();
         }
@@ -146,14 +145,16 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Conditions<Node> skip()
         {
-            if(TraversalDirection.BOTTOM_UP == iterator.getDirection()) throw new UnsupportedFeatureException("skip() can not be used in bottomUp() mode.");
+            if (TraversalDirection.BOTTOM_UP == iterator.getDirection())
+                throw new UnsupportedFeatureException("skip() can not be used in bottomUp() mode.");
             Consumer<IterationStep<Node>> setSkipTrue = step -> step.setSkip(true);
             return iterator.addOperation(OperationType.STEP_CONSUMER, setSkipTrue).getConditions();
         }
 
         public Conditions<Node> remove()
         {
-            if(iterator.currentCommandContainsWhenRoot) throw new UnsupportedFeatureException("The root element can not be removed.");
+            if (iterator.currentCommandContainsWhenRoot)
+                throw new UnsupportedFeatureException("The root element can not be removed.");
             Consumer<IterationStep<Node>> setRemoveTrue = step -> step.setRemove(true);
             return iterator.addOperation(OperationType.STEP_CONSUMER, setRemoveTrue).getConditions();
         }
@@ -161,6 +162,24 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         public Conditions<Node> replace(Supplier<Node> supplier)
         {
             Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(supplier.get());
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+        }
+
+        public Conditions<Node> replace(Function<Node, Node> function)
+        {
+            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode()));
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+        }
+
+        public Conditions<Node> replace(BiFunction<Node, String, Node> function)
+        {
+            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId()));
+            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+        }
+
+        public Conditions<Node> replace(TriFunction<Node, String, String, Node> function)
+        {
+            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId(), step.getPath()));
             return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
         }
 
@@ -211,7 +230,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         for (Command command : getCommands())
         {
             getExecutor().execute(command, step);
-            if(step.isSkip() || step.isRemove() || step.isReplace()) return;
+            if (step.isSkip() || step.isRemove() || step.isReplace()) return;
         }
     }
 
