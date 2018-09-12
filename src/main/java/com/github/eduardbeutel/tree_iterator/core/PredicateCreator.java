@@ -6,11 +6,6 @@ import java.util.regex.Pattern;
 public class PredicateCreator
 {
 
-    public static <T> Predicate<T> always()
-    {
-        return param -> true;
-    }
-
     public static Predicate<String> stringEquals(String other)
     {
         return param -> PredicateCreator.equals(param,other);

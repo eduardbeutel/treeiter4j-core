@@ -5,6 +5,7 @@ import com.github.eduardbeutel.tree_iterator.core.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
@@ -56,7 +57,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public Operations<Node> always()
         {
-            return when(PredicateCreator.always());
+            return when(o -> true);
         }
 
         public Operations<Node> whenId(String id)
@@ -113,74 +114,100 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
             return iterator.getConditions();
         }
 
+        public Conditions<Node> then(Runnable runnable)
+        {
+            return then((node) -> runnable.run());
+        }
+
         public Conditions<Node> then(Consumer<Node> consumer)
         {
-            return iterator.addOperation(OperationType.NODE_CONSUMER, consumer).getConditions();
+            Consumer<IterationStep<Node>> executeConsumer = step -> consumer.accept(step.getNode());
+            return thenForStep(executeConsumer);
         }
 
         public Conditions<Node> then(BiConsumer<Node, String> consumer)
         {
-            return iterator.addOperation(OperationType.NODE_ID_CONSUMER, consumer).getConditions();
+            Consumer<IterationStep<Node>> executeConsumer = step -> consumer.accept(step.getNode(), step.getId());
+            return thenForStep(executeConsumer);
         }
 
         public Conditions<Node> then(TriConsumer<Node, String, String> consumer)
         {
-            return iterator.addOperation(OperationType.NODE_ID_PATH_CONSUMER, consumer).getConditions();
+            Consumer<IterationStep<Node>> executeConsumer = step -> consumer.accept(step.getNode(), step.getId(), step.getPath());
+            return thenForStep(executeConsumer);
         }
 
         public Conditions<Node> collect(AtomicReference<Node> reference)
         {
-            return then(OperationCreator.setReference(reference));
+            return then(node -> reference.set(node));
         }
 
         public Conditions<Node> collect(Collection<Node> collection)
         {
-            return then(OperationCreator.addToCollection(collection));
+            return then(node -> collection.add(node));
+        }
+
+        public Conditions<Node> collectById(Map<String, Node> map)
+        {
+            return then((node, id) -> map.put(id, node));
+        }
+
+        public Conditions<Node> collectByPath(Map<String, Node> map)
+        {
+            return then((node, id, path) -> map.put(path, node));
         }
 
         public Conditions<Node> stop()
         {
-            return then(OperationCreator.throwException(new StopIterationException()));
+            return then(() ->
+            {
+                throw new StopIterationException();
+            });
         }
 
         public Conditions<Node> skip()
         {
             if (TraversalDirection.BOTTOM_UP == iterator.getDirection())
                 throw new UnsupportedFeatureException("skip() can not be used in bottomUp() mode.");
-            Consumer<IterationStep<Node>> setSkipTrue = step -> step.setSkip(true);
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setSkipTrue).getConditions();
+            Consumer<IterationStep<Node>> markToSkip = step -> step.setSkip(true);
+            return thenForStep(markToSkip);
         }
 
         public Conditions<Node> remove()
         {
             if (iterator.currentCommandContainsWhenRoot)
                 throw new UnsupportedFeatureException("The root element can not be removed.");
-            Consumer<IterationStep<Node>> setRemoveTrue = step -> step.setRemove(true);
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setRemoveTrue).getConditions();
+            Consumer<IterationStep<Node>> markForRemoval = step -> step.setRemove(true);
+            return thenForStep(markForRemoval);
         }
 
         public Conditions<Node> replace(Supplier<Node> supplier)
         {
-            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(supplier.get());
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+            Consumer<IterationStep<Node>> markForReplacement = step -> step.setReplacement(supplier.get());
+            return thenForStep(markForReplacement);
         }
 
         public Conditions<Node> replace(Function<Node, Node> function)
         {
-            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode()));
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+            Consumer<IterationStep<Node>> markForReplacement = step -> step.setReplacement(function.apply(step.getNode()));
+            return thenForStep(markForReplacement);
         }
 
         public Conditions<Node> replace(BiFunction<Node, String, Node> function)
         {
-            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId()));
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+            Consumer<IterationStep<Node>> markForReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId()));
+            return thenForStep(markForReplacement);
         }
 
         public Conditions<Node> replace(TriFunction<Node, String, String, Node> function)
         {
-            Consumer<IterationStep<Node>> setReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId(), step.getPath()));
-            return iterator.addOperation(OperationType.STEP_CONSUMER, setReplacement).getConditions();
+            Consumer<IterationStep<Node>> markForReplacement = step -> step.setReplacement(function.apply(step.getNode(), step.getId(), step.getPath()));
+            return thenForStep(markForReplacement);
+        }
+
+        protected Conditions<Node> thenForStep(Consumer<IterationStep<Node>> consumer)
+        {
+            return iterator.addOperation(consumer).getConditions();
         }
 
     }
@@ -202,9 +229,9 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         return this;
     }
 
-    protected AbstractDocumentTreeIterator<Document, Node> addOperation(OperationType type, Object operation)
+    protected AbstractDocumentTreeIterator<Document, Node> addOperation(Object operation)
     {
-        currentCommand.setOperation(new Operation(type, operation));
+        currentCommand.setOperation(operation);
         newCommand();
         return this;
     }

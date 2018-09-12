@@ -47,21 +47,7 @@ public class CommandExecutor<Node>
 
     protected void executeOperation(Command command, IterationStep<Node> step)
     {
-        switch (command.getOperation().getType())
-        {
-            case NODE_CONSUMER:
-                ((Consumer<Node>) command.getOperation().getObject()).accept(step.getNode());
-                break;
-            case NODE_ID_CONSUMER:
-                ((BiConsumer<Node,String>) command.getOperation().getObject()).accept(step.getNode(),step.getId());
-                break;
-            case NODE_ID_PATH_CONSUMER:
-                ((TriConsumer<Node,String,String>) command.getOperation().getObject()).accept(step.getNode(),step.getId(),step.getPath());
-                break;
-            case STEP_CONSUMER:
-                ((Consumer<IterationStep<Node>>) command.getOperation().getObject()).accept(step);
-                break;
-        }
+        ((Consumer<IterationStep<Node>>) command.getOperation()).accept(step);
     }
 
 

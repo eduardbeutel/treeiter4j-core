@@ -1,6 +1,5 @@
 package com.github.eduardbeutel.tree_iterator.test;
 
-import com.github.eduardbeutel.tree_iterator.core.OperationCreator;
 import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
 import org.junit.Test;
 
@@ -11,7 +10,6 @@ public class StaticClassConstructorTest
 {
 
     List<Class> staticClasses = Arrays.asList(
-            OperationCreator.class,
             PredicateCreator.class
     );
 

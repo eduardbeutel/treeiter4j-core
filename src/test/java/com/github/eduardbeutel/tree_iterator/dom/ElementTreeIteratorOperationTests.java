@@ -10,12 +10,11 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ElementTreeIteratorOperationTests
 {
@@ -28,6 +27,29 @@ public class ElementTreeIteratorOperationTests
 
     @Test
     public void then()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book id=\"1\" />\n" +
+                        "    <book/>\n" +
+                        "    <book id=\"2\" />\n" +
+                        "</library>"
+        );
+        AtomicReference<Boolean> result = new AtomicReference<>(false);
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .when(e -> "2".equals(e.getAttribute("id"))).then(() -> result.set(true))
+                .execute()
+        ;
+
+        // then
+        assertTrue(result.get().booleanValue());
+    }
+
+    @Test
+    public void then_nodeArgument()
     {
         // given
         Document document = XmlUtils.createDocument(
@@ -161,6 +183,60 @@ public class ElementTreeIteratorOperationTests
         assertEquals(2, leafs.size());
         assertEquals("title", leafs.get(0).getLocalName());
         assertEquals("author", leafs.get(1).getLocalName());
+    }
+
+    @Test
+    public void collectById_toMap()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+        Map<String,Element> elements = new LinkedHashMap<>();
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .always().collectById(elements)
+                .execute()
+        ;
+
+        // then
+        assertEquals(4, elements.size());
+        Arrays.asList("library","book","title","author")
+                .forEach( item -> assertEquals(item, elements.get(item).getLocalName()));
+    }
+
+    @Test
+    public void collectByPath_toMap()
+    {
+        // given
+        Document document = XmlUtils.createDocument(
+                "<library>\n" +
+                        "    <book>\n" +
+                        "        <title />\n" +
+                        "        <author />\n" +
+                        "    </book>\n" +
+                        "</library>"
+        );
+        Map<String,Element> elements = new LinkedHashMap<>();
+
+        // when
+        ElementTreeIterator.topDown(document)
+                .always().collectByPath(elements)
+                .execute()
+        ;
+
+        // then
+        assertEquals(4, elements.size());
+        assertEquals("library",elements.get("/library").getLocalName());
+        assertEquals("book",elements.get("/library/book").getLocalName());
+        assertEquals("title",elements.get("/library/book/title").getLocalName());
+        assertEquals("author",elements.get("/library/book/author").getLocalName());
     }
 
     @Test
