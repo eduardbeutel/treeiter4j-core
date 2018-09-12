@@ -35,14 +35,7 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
         public void execute()
         {
-            iterator.clearLastCommandIfEmpty();
-            try
-            {
-                iterator.iterate(iterator.getDocument());
-            }
-            catch (StopIterationException e)
-            {
-            }
+            iterator.execute();
         }
 
         public Operations<Node> when(Predicate<Node> predicate)
@@ -220,6 +213,18 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
         this.direction = direction;
     }
 
+    protected void execute()
+    {
+        clearLastCommandIfEmpty();
+        try
+        {
+            iterate(document);
+        }
+        catch (StopIterationException e)
+        {
+        }
+    }
+
     protected AbstractDocumentTreeIterator<Document, Node> addCondition(Condition condition)
     {
         if (currentCommand == null) newCommand();
@@ -243,10 +248,9 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
     protected void newCommand()
     {
-        Command command = new Command();
-        commands.add(command);
-        currentCommand = command;
+        currentCommand = new Command();
         currentCommandContainsWhenRoot = false;
+        commands.add(currentCommand);
     }
 
     protected void clearLastCommandIfEmpty()
@@ -259,9 +263,9 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
 
     protected void executeCommands(IterationStep<Node> step)
     {
-        for (Command command : getCommands())
+        for (Command command : commands)
         {
-            getExecutor().execute(command, step);
+            executor.execute(command, step);
             if (step.isSkip() || step.isRemove() || step.isReplace()) return;
         }
     }
@@ -282,21 +286,6 @@ public abstract class AbstractDocumentTreeIterator<Document, Node>
     protected Operations<Node> getOperations()
     {
         return operations;
-    }
-
-    protected Document getDocument()
-    {
-        return document;
-    }
-
-    protected List<Command> getCommands()
-    {
-        return commands;
-    }
-
-    protected CommandExecutor<Node> getExecutor()
-    {
-        return executor;
     }
 
     protected TraversalDirection getDirection()
