@@ -1,6 +1,6 @@
-package com.github.eduardbeutel.tree_iterator.test;
+package com.github.eduardbeutel.treeiter.test;
 
-import com.github.eduardbeutel.tree_iterator.core.PredicateCreator;
+import com.github.eduardbeutel.treeiter.common.PredicateCreator;
 import org.junit.Test;
 
 import java.util.Arrays;

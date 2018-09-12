@@ -1,4 +1,4 @@
-package com.github.eduardbeutel.tree_iterator.document;
+package com.github.eduardbeutel.treeiter.document;
 
 public class IterationStep<Node>
 {

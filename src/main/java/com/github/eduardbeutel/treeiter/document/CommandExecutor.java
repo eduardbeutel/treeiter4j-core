@@ -1,6 +1,6 @@
-package com.github.eduardbeutel.tree_iterator.document;
+package com.github.eduardbeutel.treeiter.document;
 
-import com.github.eduardbeutel.tree_iterator.core.*;
+import com.github.eduardbeutel.treeiter.common.*;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;

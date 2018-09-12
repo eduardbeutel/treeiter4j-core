@@ -1,8 +1,7 @@
-package com.github.eduardbeutel.tree_iterator.dom;
+package com.github.eduardbeutel.treeiter.dom;
 
-import com.github.eduardbeutel.tree_iterator.core.UnsupportedFeatureException;
-import com.github.eduardbeutel.tree_iterator.dom.ElementTreeIterator;
-import com.github.eduardbeutel.tree_iterator.test.XmlUtils;
+import com.github.eduardbeutel.treeiter.common.UnsupportedFeatureException;
+import com.github.eduardbeutel.treeiter.test.XmlUtils;
 import org.custommonkey.xmlunit.XMLAssert;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;

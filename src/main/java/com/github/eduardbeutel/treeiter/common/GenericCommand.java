@@ -1,4 +1,4 @@
-package com.github.eduardbeutel.tree_iterator.core;
+package com.github.eduardbeutel.treeiter.common;
 
 import java.util.ArrayList;
 import java.util.List;

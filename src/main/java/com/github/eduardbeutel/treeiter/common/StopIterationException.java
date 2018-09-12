@@ -1,4 +1,4 @@
-package com.github.eduardbeutel.tree_iterator.core;
+package com.github.eduardbeutel.treeiter.common;
 
 public class StopIterationException extends RuntimeException
 {

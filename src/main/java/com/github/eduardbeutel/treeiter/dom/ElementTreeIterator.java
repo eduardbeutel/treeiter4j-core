@@ -1,8 +1,8 @@
-package com.github.eduardbeutel.tree_iterator.dom;
+package com.github.eduardbeutel.treeiter.dom;
 
-import com.github.eduardbeutel.tree_iterator.core.TraversalDirection;
-import com.github.eduardbeutel.tree_iterator.document.AbstractDocumentTreeIterator;
-import com.github.eduardbeutel.tree_iterator.document.IterationStep;
+import com.github.eduardbeutel.treeiter.common.TraversalDirection;
+import com.github.eduardbeutel.treeiter.document.AbstractDocumentTreeIterator;
+import com.github.eduardbeutel.treeiter.document.IterationStep;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;

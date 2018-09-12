@@ -1,10 +1,9 @@
-package com.github.eduardbeutel.tree_iterator.dom;
+package com.github.eduardbeutel.treeiter.dom;
 
-import com.github.eduardbeutel.tree_iterator.core.Condition;
-import com.github.eduardbeutel.tree_iterator.core.UnsupportedFeatureException;
-import com.github.eduardbeutel.tree_iterator.document.Command;
-import com.github.eduardbeutel.tree_iterator.document.CommandExecutor;
-import com.github.eduardbeutel.tree_iterator.document.IterationStep;
+import com.github.eduardbeutel.treeiter.common.Condition;
+import com.github.eduardbeutel.treeiter.common.UnsupportedFeatureException;
+import com.github.eduardbeutel.treeiter.document.Command;
+import com.github.eduardbeutel.treeiter.document.CommandExecutor;
 import org.junit.Test;
 
 public class CommandExecutorTest
@@ -24,4 +23,5 @@ public class CommandExecutorTest
 
         // then -> exception
     }
+
 }

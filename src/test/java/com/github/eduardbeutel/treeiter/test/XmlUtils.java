@@ -1,4 +1,4 @@
-package com.github.eduardbeutel.tree_iterator.test;
+package com.github.eduardbeutel.treeiter.test;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

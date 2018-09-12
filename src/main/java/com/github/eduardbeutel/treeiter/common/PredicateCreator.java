@@ -1,4 +1,4 @@
-package com.github.eduardbeutel.tree_iterator.core;
+package com.github.eduardbeutel.treeiter.common;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
